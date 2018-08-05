@@ -11,7 +11,8 @@ class App extends Component {
     super(props);
     this.state={
       maxItem:'',
-      data:[]
+      data:[],
+      loading: true
     }
   }
   
@@ -35,28 +36,28 @@ class App extends Component {
   showCards(){
   
     let maxItem = this.state.maxItem;
-    let arr=[];
+    let promises=[];
     
     for(let i=0;i<10;i++){
-      
-      let itemUrl = baseUrl+'item/'+(maxItem-i)+'.json';
-      axios.get(itemUrl)
-      .then(result => {
-        arr.push(result.data);
-      });
+      promises.push(axios(baseUrl+'item/'+(maxItem-i)+'.json'));
     }
-    this.setState({
-      data:arr
+    
+    Promise.all(promises).then((data) => {
+      this.setState({
+      data:data,
+      loading: false
     });
+
+    });
+
   }
   
   render() {
     
-    console.log("in app: ",Object.keys(this.state.data));
+    // console.log("in app: ",Object.keys(this.state.data));
     return (
       <div>
-        <Card data={this.state.data}/>
-        
+        <Card data={this.state.data} loading={this.state.loading}/>
         <Topics/>
       </div>
     );
