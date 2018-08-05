@@ -4,6 +4,8 @@ import Card from './Card.js';
 import Topics from './Topics.js';
 import axios from 'axios';
 import { baseUrl } from './config.js';
+import Promise from 'bluebird'
+
 
 class App extends Component {
   
@@ -32,19 +34,27 @@ class App extends Component {
     
   }
   
-  showCards(){
+  async showCards(){
   
     let maxItem = this.state.maxItem;
-    let arr=[];
     
-    for(let i=0;i<10;i++){
-      
-      let itemUrl = baseUrl+'item/'+(maxItem-i)+'.json';
-      axios.get(itemUrl)
-      .then(result => {
-        arr.push(result.data);
-      });
+    const urlList = []
+
+    for(let i=0;i<10;i++){      
+      urlList.push(baseUrl+'item/'+(maxItem-i)+'.json');
     }
+
+    const arr = await Promise.map(
+      urlList,
+      async url => (await axios.get(url)).data
+    )
+
+    // axios.get(itemUrl)
+    // .then(result => {
+    //   arr.push(result.data);
+    // });
+
+
     this.setState({
       data:arr
     });
@@ -52,7 +62,7 @@ class App extends Component {
   
   render() {
     
-    console.log("in app: ",Object.keys(this.state.data));
+    console.log("in app: ",Object.keys(this.state.data), this.state.data);
     return (
       <div>
         <Card data={this.state.data}/>
